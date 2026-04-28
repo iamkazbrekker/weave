@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, User, ChevronRight, ArrowLeft, Phone, MapPin, Award, Heart, Fingerprint } from "lucide-react";
+import { API_URL } from "./config";
 
 interface Volunteer {
   _id: string;
@@ -28,7 +29,7 @@ export default function VolunteersView() {
   const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_URL = "http://localhost:5000";
+  // API_URL imported from config.ts
 
   useEffect(() => {
     if (view === "list" || view === "dashboard") {

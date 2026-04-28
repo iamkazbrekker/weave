@@ -1,19 +1,24 @@
-# Use the official Node.js 20 image
-FROM node:20
+# Use the official Node.js 20 image (slim for smaller size)
+FROM node:20-slim
 
 # Create and change to the app directory
 WORKDIR /usr/src/app
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure both package.json and package-lock.json are copied.
-# Copying this separately prevents re-running npm install on every code change.
+# Copy dependency manifests first (for Docker layer caching)
 COPY package*.json ./
 
-# Install production dependencies.
-RUN npm install --only=production
+# Install production dependencies only
+RUN npm ci --only=production
 
-# Copy local code to the container image.
+# Copy application source code
 COPY . .
 
-# Run the web service on container startup.
+# Create uploads directory
+RUN mkdir -p uploads
+
+# Cloud Run injects PORT env var automatically
+ENV PORT=8080
+EXPOSE 8080
+
+# Run the server
 CMD ["node", "server.js"]

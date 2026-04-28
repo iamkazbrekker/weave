@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "./config";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -574,7 +575,7 @@ function ReportsView() {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/problems");
+      const res = await fetch(`${API_URL}/problems`);
       if (res.ok) {
         const data = await res.json();
         setReports(data);
@@ -593,7 +594,7 @@ function ReportsView() {
   const handleAssign = async (id: string) => {
     setAssigning(id);
     try {
-      const res = await fetch(`http://localhost:5000/problems/${id}/assign`, { method: "POST" });
+      const res = await fetch(`${API_URL}/problems/${id}/assign`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         alert(`Volunteer Assigned: ${data.assignedTo.name}`);
@@ -674,7 +675,7 @@ function ReportsView() {
                 
                 {report.imageUrl && (
                   <div className="w-32 h-32 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
-                    <img src={report.imageUrl.startsWith('http') ? report.imageUrl : `http://localhost:5000${report.imageUrl}`} alt="Report" className="w-full h-full object-cover" />
+                    <img src={report.imageUrl.startsWith('http') ? report.imageUrl : `${API_URL}${report.imageUrl}`} alt="Report" className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>
@@ -711,7 +712,7 @@ function SurveyLoom() {
   const [selectedSurvey, setSelectedSurvey] = useState<any>(null);
   const [surveyResponses, setSurveyResponses] = useState<any[]>([]);
 
-  const API_URL = "http://localhost:5000";
+  // API_URL imported from config.ts
 
   useEffect(() => {
     if (view === "dashboard") {

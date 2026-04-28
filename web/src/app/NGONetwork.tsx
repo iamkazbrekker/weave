@@ -6,8 +6,9 @@ import {
   CheckCircle2, Plus, LogOut, Loader2, ChevronRight,
   Navigation, Target, X,
 } from "lucide-react";
+import { API_URL } from "./config";
 
-const API = "http://localhost:5000";
+const API = API_URL;
 
 // ─── Haversine distance (km) ────────────────────────────────────────────────
 function distKm(lat1: number, lng1: number, lat2: number, lng2: number) {

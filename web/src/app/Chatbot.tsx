@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Bot, User } from "lucide-react";
+import { API_URL } from "./config";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function Chatbot() {
     setIsTyping(true);
 
     try {
-      const res = await fetch("http://localhost:5000/chat", {
+      const res = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
