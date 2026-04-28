@@ -29,7 +29,16 @@ export default function VolunteersView() {
   const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // API_URL imported from config.ts
+  // Recruit Form State
+  const [recruitName, setRecruitName] = useState("");
+  const [recruitEmail, setRecruitEmail] = useState("");
+  const [recruitPhone, setRecruitPhone] = useState("");
+  const [recruitLocation, setRecruitLocation] = useState("");
+  const [recruitAddress, setRecruitAddress] = useState("");
+  const [recruitAadhaar, setRecruitAadhaar] = useState("");
+  const [recruitSkills, setRecruitSkills] = useState("");
+  const [recruitInterests, setRecruitInterests] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (view === "list" || view === "dashboard") {
