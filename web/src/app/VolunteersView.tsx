@@ -24,7 +24,7 @@ const VOLUNTEER_SEED: Volunteer[] = [
 ];
 
 export default function VolunteersView() {
-  const [view, setView] = useState<"dashboard" | "list" | "profile">("dashboard");
+  const [view, setView] = useState<"dashboard" | "list" | "profile" | "recruit">("dashboard");
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +57,53 @@ export default function VolunteersView() {
     }
   }, [view]);
 
+  const handleRecruitSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recruitName || !recruitEmail || !recruitPhone || !recruitLocation) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_URL}/volunteers/recruit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: recruitName,
+          email: recruitEmail,
+          phone: recruitPhone,
+          location: recruitLocation,
+          address: recruitAddress,
+          aadhaar: recruitAadhaar,
+          skills: recruitSkills.split(",").map(s => s.trim()).filter(s => s !== ""),
+          interests: recruitInterests.split(",").map(i => i.trim()).filter(i => i !== ""),
+        }),
+      });
+
+      if (res.ok) {
+        alert("Volunteer recruited successfully!");
+        setRecruitName("");
+        setRecruitEmail("");
+        setRecruitPhone("");
+        setRecruitLocation("");
+        setRecruitAddress("");
+        setRecruitAadhaar("");
+        setRecruitSkills("");
+        setRecruitInterests("");
+        setView("list");
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to recruit volunteer");
+      }
+    } catch (err) {
+      console.error("Error recruiting volunteer:", err);
+      alert("Error recruiting volunteer");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Dashboard stub (default view matching old Stub)
   if (view === "dashboard") {
     return (
@@ -71,12 +118,137 @@ export default function VolunteersView() {
             <p className="text-2xl font-black text-[#D4AF37]">12</p>
           </div>
         </div>
-        <button 
-          onClick={() => setView("list")}
-          className="w-full py-5 bg-[#4a3e3e] text-white font-black uppercase tracking-[0.2em] rounded-[2rem] hover:bg-[#4a3e3e]/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#4a3e3e]/20"
-        >
-          Show Volunteers
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setView("list")}
+            className="w-full py-5 bg-[#4a3e3e] text-white font-black uppercase tracking-[0.2em] rounded-[2rem] hover:bg-[#4a3e3e]/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#4a3e3e]/20"
+          >
+            Show Volunteers
+          </button>
+          <button
+            onClick={() => setView("recruit")}
+            className="w-full py-5 bg-white border-2 border-[#4a3e3e] text-[#4a3e3e] font-black uppercase tracking-[0.2em] rounded-[2rem] hover:bg-[#4a3e3e]/5 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[#4a3e3e]/5"
+          >
+            Recruit New Thread
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Recruit Volunteer Form View
+  if (view === "recruit") {
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full max-h-[60vh] overflow-y-auto pr-2">
+        <div className="flex justify-between items-center pb-4 border-b border-[#4a3e3e]/10">
+          <h3 className="text-xl font-black text-[#4a3e3e] uppercase tracking-wider">Recruit New Thread</h3>
+          <button
+            onClick={() => setView("dashboard")}
+            className="text-sm font-bold text-[#4a3e3e]/40 hover:text-[#4a3e3e] transition-colors"
+          >
+            Back to Overview
+          </button>
+        </div>
+
+        <form onSubmit={handleRecruitSubmit} className="space-y-4 pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Full Name *</label>
+              <input
+                type="text"
+                value={recruitName}
+                onChange={(e) => setRecruitName(e.target.value)}
+                placeholder="Riya Sharma"
+                className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Email Address *</label>
+              <input
+                type="email"
+                value={recruitEmail}
+                onChange={(e) => setRecruitEmail(e.target.value)}
+                placeholder="riya@example.com"
+                className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Phone Number *</label>
+              <input
+                type="tel"
+                value={recruitPhone}
+                onChange={(e) => setRecruitPhone(e.target.value)}
+                placeholder="+91-9876543210"
+                className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Location (City) *</label>
+              <input
+                type="text"
+                value={recruitLocation}
+                onChange={(e) => setRecruitLocation(e.target.value)}
+                placeholder="New Delhi"
+                className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Detailed Address</label>
+            <input
+              type="text"
+              value={recruitAddress}
+              onChange={(e) => setRecruitAddress(e.target.value)}
+              placeholder="Connaught Place, New Delhi"
+              className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Aadhaar Card Number (Last 4 digits or Full)</label>
+            <input
+              type="text"
+              value={recruitAadhaar}
+              onChange={(e) => setRecruitAadhaar(e.target.value)}
+              placeholder="XXXX-XXXX-1234"
+              className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Skills (Comma separated)</label>
+            <input
+              type="text"
+              value={recruitSkills}
+              onChange={(e) => setRecruitSkills(e.target.value)}
+              placeholder="First Aid, Teaching, Logistics"
+              className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3e3e]/40 ml-2">Interests (Comma separated)</label>
+            <input
+              type="text"
+              value={recruitInterests}
+              onChange={(e) => setRecruitInterests(e.target.value)}
+              placeholder="Education, Health, Environment"
+              className="w-full bg-white/60 border border-[#4a3e3e]/5 px-5 py-3 rounded-2xl font-bold text-[#4a3e3e] focus:ring-2 focus:ring-[#4a3e3e]/10 focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-5 bg-[#D4AF37] text-white font-black uppercase tracking-[0.2em] rounded-[2rem] hover:bg-[#D4AF37]/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[#D4AF37]/20 mt-4 disabled:opacity-50"
+          >
+            {isSubmitting ? "Recruiting..." : "Integrate Thread into Fabric"}
+          </button>
+        </form>
       </div>
     );
   }
@@ -86,7 +258,7 @@ export default function VolunteersView() {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 h-full max-h-[60vh] overflow-y-auto pr-2">
         <div className="flex justify-between items-center pb-4 border-b border-[#4a3e3e]/10">
-          <button 
+          <button
             onClick={() => { setSelectedVolunteer(null); setView("list"); }}
             className="flex items-center space-x-2 text-sm font-bold text-[#4a3e3e]/40 hover:text-[#4a3e3e] transition-colors"
           >
@@ -100,8 +272,8 @@ export default function VolunteersView() {
           <div className="flex-shrink-0 flex flex-col items-center space-y-4 w-full md:w-1/3">
             <div className="relative">
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_10px_30px_rgba(74,62,62,0.1)]">
-                <img 
-                  src={selectedVolunteer.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVolunteer.name)}&background=f4dada&color=4a3e3e`} 
+                <img
+                  src={selectedVolunteer.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVolunteer.name)}&background=f4dada&color=4a3e3e`}
                   alt={selectedVolunteer.name}
                   className="w-full h-full object-cover"
                 />
@@ -118,7 +290,7 @@ export default function VolunteersView() {
 
           {/* Right Column: Details */}
           <div className="flex-1 w-full space-y-4">
-            
+
             <div className="bg-white/60 p-5 rounded-[1.5rem] border border-[#4a3e3e]/5 backdrop-blur-md shadow-sm">
               <div className="flex items-start space-x-3 mb-3">
                 <MapPin className="text-[#4a3e3e]/40 mt-1" size={18} />
@@ -127,7 +299,7 @@ export default function VolunteersView() {
                   <p className="font-bold text-[#4a3e3e]">{selectedVolunteer.address || "Address not provided"}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3 mb-3">
                 <Phone className="text-[#4a3e3e]/40 mt-1" size={18} />
                 <div>
@@ -192,12 +364,20 @@ export default function VolunteersView() {
     <div className="space-y-6 animate-in fade-in duration-500 h-full max-h-[60vh] overflow-y-auto pr-2">
       <div className="flex justify-between items-center pb-4 border-b border-[#4a3e3e]/10">
         <h3 className="text-xl font-black text-[#4a3e3e] uppercase tracking-wider">Present Volunteers</h3>
-        <button 
-          onClick={() => setView("dashboard")}
-          className="text-sm font-bold text-[#4a3e3e]/40 hover:text-[#4a3e3e] transition-colors"
-        >
-          Back to Overview
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setView("recruit")}
+            className="text-sm font-black text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors uppercase tracking-widest"
+          >
+            + Recruit
+          </button>
+          <button
+            onClick={() => setView("dashboard")}
+            className="text-sm font-bold text-[#4a3e3e]/40 hover:text-[#4a3e3e] transition-colors"
+          >
+            Back to Overview
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -217,8 +397,8 @@ export default function VolunteersView() {
             >
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                  <img 
-                    src={vol.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(vol.name)}&background=random`} 
+                  <img
+                    src={vol.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(vol.name)}&background=random`}
                     alt={vol.name}
                     className="w-full h-full object-cover"
                   />
